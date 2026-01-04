@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>查专业 → 查岗位（本地版A）</title>
+  <link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+<header>
+  <div class="container">
+    <h1>查专业 → 查岗位（本地版A）</h1>
+    <div class="small">数据来源：5个选项已处理.xlsx（已转为本地 JSON）；专业目录：2026年公务员专业目录.doc（已转换）</div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="tabs">
+    <button id="tabMajor" class="tab active">① 查专业大类</button>
+    <button id="tabJobs" class="tab">② 查可报岗位</button>
+  </div>
+
+  <section id="panelMajor" class="card">
+    <div class="grid">
+      <div class="field" style="grid-column: span 3;">
+        <label>学历层次</label>
+        <select id="mEdu">
+          <option value="本科">本科</option>
+          <option value="专科">专科</option>
+          <option value="研究生">研究生</option>
+        </select>
+      </div>
+      <div class="field" style="grid-column: span 6;">
+        <label>专业名称（精确）</label>
+        <input id="mMajor" placeholder="例如：会计学"/>
+      </div>
+      <div class="field" style="grid-column: span 3; align-self:end;">
+        <button class="primary" id="btnMajor">查询大类</button>
+      </div>
+    </div>
+    <div style="margin-top:10px" class="small">说明：本功能为严格精确匹配；一个专业可能对应多个大类。</div>
+    <div id="majorOut" style="margin-top:12px"></div>
+    <hr/>
+    <div class="small">提示：查询出的大类会自动带入“查可报岗位”。</div>
+  </section>
+
+  <section id="panelJobs" class="card" style="display:none">
+    <div class="grid">
+      <div class="field" style="grid-column: span 3;">
+        <label>学历层次</label>
+        <select id="jEdu">
+          <option value="本科">本科</option>
+          <option value="专科">专科</option>
+          <option value="研究生">研究生</option>
+        </select>
+      </div>
+      <div class="field" style="grid-column: span 5;">
+        <label>专业名称（精确）</label>
+        <input id="jMajor" placeholder="例如：会计学"/>
+      </div>
+      <div class="field" style="grid-column: span 4;">
+        <label>你的专业大类（自动计算）</label>
+        <input id="jCats" disabled placeholder="先输入专业并点查询大类或点下方查询按钮"/>
+      </div>
+
+      <div class="field" style="grid-column: span 2;">
+        <label>性别</label>
+        <select id="gender">
+          <option value="">不确定</option>
+          <option value="男">男</option>
+          <option value="女">女</option>
+        </select>
+      </div>
+
+      <div class="field" style="grid-column: span 2;">
+        <label>政治面貌</label>
+        <select id="party">
+          <option value="">不确定</option>
+          <option value="是">党员（含预备）</option>
+          <option value="否">非党员</option>
+        
+        </select>
+      </div>
+      <div class="field" style="grid-column: span 2;">
+        <label>基层服务项目</label>
+        <select id="baseService">
+          <option value="">不确定</option>
+          <option value="是">具备基层服务经历</option>
+          <option value="否">不具备</option>
+        </select>
+      </div>
+
+
+      <div class="field" style="grid-column: span 2;">
+        <label>是否应届生</label>
+        <select id="grad">
+          <option value="">不确定（按非应届处理）</option>
+          <option value="是">应届</option>
+          <option value="否">非应届</option>
+        </select>
+      </div>
+
+      <div class="field" style="grid-column: span 3;">
+        <label>户籍省份</label>
+        <select id="hukouProv">
+          <option value="">不确定</option>
+          <option value="江苏">江苏</option>
+          <option value="非江苏">非江苏</option>
+        </select>
+      </div>
+
+      <div class="field" style="grid-column: span 3;">
+        <label>户籍城市（仅江苏时）</label>
+        <select id="hukouCity" disabled>
+          <option value="">不选择</option>
+          <option value="南京">南京</option>
+          <option value="苏州">苏州</option>
+          <option value="无锡">无锡</option>
+          <option value="常州">常州</option>
+          <option value="镇江">镇江</option>
+          <option value="南通">南通</option>
+          <option value="扬州">扬州</option>
+          <option value="泰州">泰州</option>
+          <option value="盐城">盐城</option>
+          <option value="淮安">淮安</option>
+          <option value="连云港">连云港</option>
+          <option value="宿迁">宿迁</option>
+          <option value="徐州">徐州</option>
+        </select>
+      </div>
+
+      <div class="field" style="grid-column: span 12;">
+        <div id="fixedNotice" class="notice" style="display:none"></div>
+      </div>
+
+      <div class="field" style="grid-column: span 3;">
+        <label>地区（意向城市匹配项 / 14项）</label>
+        <select id="region">
+          <option value="">全部（按规则自动隐藏部分城市）</option>
+        </select>
+      </div>
+
+      <div class="field" style="grid-column: span 4;">
+        <label>岗位/单位关键词</label>
+        <input id="kw" placeholder="例如：财政、公安、办公室"/>
+      </div>
+
+      <div class="field" style="grid-column: span 3;">
+        <label>考试类别</label>
+        <select id="examType">
+          <option value="">全部</option>
+        </select>
+      </div>
+
+      <div class="field" style="grid-column: span 2;">
+        <label>专业不限</label>
+        <select id="majorUnlimited">
+          <option value="">全部</option>
+          <option value="是">只看专业不限</option>
+        </select>
+      </div>
+
+      <div class="field" style="grid-column: span 4;">
+        <label>应届生附加开关</label>
+        <div class="small">
+          <input type="checkbox" id="onlyGradJobs"/> 只看应届岗（是否2026=是）
+        </div>
+      </div>
+
+      <div class="field" style="grid-column: span 4;">
+        <label>分页</label>
+        <select id="pageSize">
+          <option value="20">20 / 页</option>
+          <option value="50">50 / 页</option>
+          <option value="100">100 / 页</option>
+        </select>
+      </div>
+
+      <div class="field" style="grid-column: span 12;">
+        <div class="btnbar">
+          <button class="ghost" id="btnReset">重置条件</button>
+          <button class="primary" id="btnQuery">查询（更新结果）</button>
+        </div>
+        <div class="small">所有条件变更后必须点击“查询（更新结果）”才会刷新结果。</div>
+      </div>
+    </div>
+
+    <hr/>
+
+    <div class="resultsTop">
+      <div>
+        <span class="badge" id="countBadge">未查询</span>
+        <span class="small" id="hint"></span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="ghost" id="btnExport" disabled>导出 Excel</button>
+      </div>
+    </div>
+
+    <div id="results" style="margin-top:12px"></div>
+    <div class="pager" id="pager" style="display:none"></div>
+  </section>
+
+</div>
+
+<script src="./app.js"></script>
+</body>
+</html>
