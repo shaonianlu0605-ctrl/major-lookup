@@ -38,10 +38,19 @@ h1{
   font-size:42px;
   letter-spacing:.2px;
   font-weight:700;
+  color:var(--accent);
   background:linear-gradient(90deg, var(--accent) 0%, var(--accent2) 100%);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
   background-clip:text;
+  /* Fallback for browsers that don't support background-clip */
+}
+/* Fallback for older browsers */
+@supports not (background-clip: text) {
+  h1 {
+    color:var(--accent);
+    background:none;
+  }
 }
 .container{
   max-width:1200px;
