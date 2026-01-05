@@ -5,6 +5,10 @@ const REGION_CITIES = ["江苏省属","南京","苏州","无锡","常州","镇�
 const FORBID_NON_JS = ["常州","无锡","苏州","镇江","连云港"];
 const FORBID_LYG = ["常州","无锡","苏州","镇江"];
 
+// 登录相关常量
+const LOGIN_STORAGE_KEY = 'jiangsu_exam_login';
+const LOGIN_DURATION = 24 * 60 * 60 * 1000; // 24小时
+
 let JOBS = [];
 let MAJOR_MAP = {};
 let applied = null;
@@ -389,7 +393,7 @@ function exportExcel(){
 }
 
 function bindUI(){
-  // tabs with aria support
+  // tabs with aria support - 只绑定"查专业大类"标签
   $("tabMajor").addEventListener("click", ()=>{
     $("tabMajor").classList.add("active"); 
     $("tabJobs").classList.remove("active");
@@ -398,14 +402,8 @@ function bindUI(){
     $("panelMajor").style.display="block"; 
     $("panelJobs").style.display="none";
   });
-  $("tabJobs").addEventListener("click", ()=>{
-    $("tabJobs").classList.add("active"); 
-    $("tabMajor").classList.remove("active");
-    $("tabJobs").setAttribute("aria-selected", "true");
-    $("tabMajor").setAttribute("aria-selected", "false");
-    $("panelJobs").style.display="block"; 
-    $("panelMajor").style.display="none";
-  });
+  
+  // "查可报岗位"标签的点击事件在bindLoginUI中处理
 
   // major query with loading state
   $("btnMajor").addEventListener("click", ()=>{
@@ -529,6 +527,139 @@ async function init(){
   const d = buildDraft(); const p=normalizeProfile(d);
   refreshRegionOptions(p);
   bindUI();
+  bindLoginUI(); // 绑定登录功能
+}
+
+init();
+
+
+// ========== 登录功能 ==========
+
+// 检查登录状态
+function checkLogin(){
+  const data = localStorage.getItem(LOGIN_STORAGE_KEY);
+  if(!data) return false;
+  try{
+    const {account, expireTime} = JSON.parse(data);
+    if(Date.now() < expireTime) return true;
+  }catch(e){}
+  localStorage.removeItem(LOGIN_STORAGE_KEY);
+  return false;
+}
+
+// 保存登录状态
+function saveLogin(account){
+  const expireTime = Date.now() + LOGIN_DURATION;
+  localStorage.setItem(LOGIN_STORAGE_KEY, JSON.stringify({account, expireTime}));
+}
+
+// 显示登录弹窗
+function showLoginModal(){
+  $("loginModal").style.display = "flex";
+  $("loginAccount").value = "";
+  $("loginPassword").value = "";
+  $("loginError").style.display = "none";
+  $("loginAccount").focus();
+}
+
+// 隐藏登录弹窗
+function hideLoginModal(){
+  $("loginModal").style.display = "none";
+}
+
+// 显示注册弹窗
+function showRegisterModal(){
+  hideLoginModal();
+  $("registerModal").style.display = "flex";
+}
+
+// 隐藏注册弹窗
+function hideRegisterModal(){
+  $("registerModal").style.display = "none";
+}
+
+// 验证登录
+function validateLogin(account, password){
+  // 验证账号格式
+  if(!/^\d{11}$/.test(account)){
+    return {success: false, message: "账号必须是11位数字"};
+  }
+  // 验证密码格式
+  if(!/^[a-zA-Z0-9]+$/.test(password) || password.length < 6){
+    return {success: false, message: "密码格式不正确"};
+  }
+  // 验证账号密码
+  if(typeof USERS === 'undefined'){
+    return {success: false, message: "用户数据加载失败"};
+  }
+  if(USERS[account] === password){
+    return {success: true};
+  }
+  return {success: false, message: "账号或密码错误"};
+}
+
+// 绑定登录相关事件
+function bindLoginUI(){
+  // 点击"查可报岗位"标签时检查登录
+  const tabJobs = $("tabJobs");
+  const originalHandler = tabJobs.onclick;
+  
+  // 移除原有的点击事件，添加新的登录检查
+  tabJobs.onclick = null;
+  
+  tabJobs.addEventListener("click", (e)=>{
+    if(!checkLogin()){
+      e.preventDefault();
+      e.stopPropagation();
+      showLoginModal();
+      return false;
+    }
+    // 如果已登录，执行原有的切换逻辑
+    $("tabJobs").classList.add("active"); 
+    $("tabMajor").classList.remove("active");
+    $("tabJobs").setAttribute("aria-selected", "true");
+    $("tabMajor").setAttribute("aria-selected", "false");
+    $("panelJobs").style.display="block"; 
+    $("panelMajor").style.display="none";
+  });
+
+  // 登录表单提交
+  $("loginForm").addEventListener("submit", (e)=>{
+    e.preventDefault();
+    const account = $("loginAccount").value.trim();
+    const password = $("loginPassword").value.trim();
+    const result = validateLogin(account, password);
+    
+    if(result.success){
+      saveLogin(account);
+      hideLoginModal();
+      // 切换到查岗位标签
+      $("tabJobs").click();
+    }else{
+      $("loginError").textContent = result.message;
+      $("loginError").style.display = "block";
+    }
+  });
+
+  // 关闭登录弹窗
+  $("closeLogin").addEventListener("click", hideLoginModal);
+  $("loginModal").querySelector(".modal-overlay").addEventListener("click", hideLoginModal);
+
+  // 显示注册弹窗
+  $("showRegister").addEventListener("click", (e)=>{
+    e.preventDefault();
+    showRegisterModal();
+  });
+
+  // 关闭注册弹窗
+  $("closeRegister").addEventListener("click", hideRegisterModal);
+  $("registerModal").querySelector(".modal-overlay").addEventListener("click", hideRegisterModal);
+
+  // 返回登录
+  $("backToLogin").addEventListener("click", ()=>{
+    hideRegisterModal();
+    showLoginModal();
+  });
 }
 
 init();
