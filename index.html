@@ -4,8 +4,8 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <meta name="description" content="江苏省考专业查岗系统 - 查询专业大类和可报考岗位"/>
-  <title>江苏省考专业查岗系统</title>
-  <link rel="stylesheet" href="./styles.css"/>
+  <title>江苏省考选岗系统-k版</title>
+  <link rel="stylesheet" href="./styles.css?v=20260105-2"/>
 </head>
 <body>
 <header role="banner">
@@ -204,6 +204,48 @@
 
 </main>
 
-<script src="./app.js"></script>
+<!-- 登录弹窗 -->
+<div id="loginModal" class="modal" style="display:none">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <button class="modal-close" id="closeLogin" aria-label="关闭">&times;</button>
+    <h2 class="modal-title">登录账号</h2>
+    <p class="modal-subtitle">登录后可查询可报考岗位</p>
+    <form id="loginForm" class="login-form">
+      <div class="form-group">
+        <label for="loginAccount">账号</label>
+        <input type="text" id="loginAccount" placeholder="请输入11位账号" maxlength="11" pattern="[0-9]{11}" required/>
+      </div>
+      <div class="form-group">
+        <label for="loginPassword">密码</label>
+        <input type="password" id="loginPassword" placeholder="请输入密码" required/>
+      </div>
+      <div id="loginError" class="error-message" style="display:none"></div>
+      <button type="submit" class="primary modal-btn">登录</button>
+      <div class="modal-footer">
+        <span class="small">还没有账号？</span>
+        <a href="#" id="showRegister" class="link">点击注册</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 注册弹窗 -->
+<div id="registerModal" class="modal" style="display:none">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <button class="modal-close" id="closeRegister" aria-label="关闭">&times;</button>
+    <h2 class="modal-title">注册账号</h2>
+    <p class="modal-subtitle">扫码添加微信，联系管理员开通账号</p>
+    <div class="qr-container">
+      <img src="./zhuche.jpg" alt="微信二维码" class="qr-code" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect width=%22200%22 height=%22200%22 fill=%22%23f0f0f0%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22 font-size=%2214%22%3E二维码占位符%3C/text%3E%3C/svg%3E'"/>
+      <p class="small qr-hint">请使用微信扫描二维码</p>
+    </div>
+    <button class="ghost modal-btn" id="backToLogin">返回登录</button>
+  </div>
+</div>
+
+<script src="./users.js?v=20260105-4"></script>
+<script src="./app.js?v=20260105-4"></script>
 </body>
 </html>
