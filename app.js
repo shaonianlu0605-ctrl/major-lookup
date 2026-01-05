@@ -389,28 +389,48 @@ function exportExcel(){
 }
 
 function bindUI(){
-  // tabs
+  // tabs with aria support
   $("tabMajor").addEventListener("click", ()=>{
-    $("tabMajor").classList.add("active"); $("tabJobs").classList.remove("active");
-    $("panelMajor").style.display="block"; $("panelJobs").style.display="none";
+    $("tabMajor").classList.add("active"); 
+    $("tabJobs").classList.remove("active");
+    $("tabMajor").setAttribute("aria-selected", "true");
+    $("tabJobs").setAttribute("aria-selected", "false");
+    $("panelMajor").style.display="block"; 
+    $("panelJobs").style.display="none";
   });
   $("tabJobs").addEventListener("click", ()=>{
-    $("tabJobs").classList.add("active"); $("tabMajor").classList.remove("active");
-    $("panelJobs").style.display="block"; $("panelMajor").style.display="none";
+    $("tabJobs").classList.add("active"); 
+    $("tabMajor").classList.remove("active");
+    $("tabJobs").setAttribute("aria-selected", "true");
+    $("tabMajor").setAttribute("aria-selected", "false");
+    $("panelJobs").style.display="block"; 
+    $("panelMajor").style.display="none";
   });
 
-  // major query
+  // major query with loading state
   $("btnMajor").addEventListener("click", ()=>{
-    const edu = $("mEdu").value;
-    const major = $("mMajor").value.trim();
-    const cats = getUserCats(edu, major);
-    $("majorOut").innerHTML = cats.length
-      ? `<div class="notice">所属大类：${cats.map(c=>`<span class="badge">${esc(c)}</span>`).join(" ")}<\/div>`
-      : `<div class="notice">未在专业目录中找到该专业（需精确匹配）。<\/div>`;
-    // sync to jobs panel
-    $("jEdu").value = edu;
-    $("jMajor").value = major;
-    $("jCats").value = cats.join("，");
+    const btn = $("btnMajor");
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading"></span> 查询中...';
+    
+    setTimeout(() => {
+      const edu = $("mEdu").value;
+      const major = $("mMajor").value.trim();
+      const cats = getUserCats(edu, major);
+      const output = $("majorOut");
+      output.classList.add("fade-in");
+      output.innerHTML = cats.length
+        ? `<div class="notice">所属大类：${cats.map(c=>`<span class="badge">${esc(c)}</span>`).join(" ")}<\/div>`
+        : `<div class="notice">未在专业目录中找到该专业（需精确匹配）。<\/div>`;
+      // sync to jobs panel
+      $("jEdu").value = edu;
+      $("jMajor").value = major;
+      $("jCats").value = cats.join("，");
+      
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }, 300);
   });
 
   // hukou/prov/grad changes affect UI only (no auto query)
@@ -427,26 +447,41 @@ function bindUI(){
   ["grad","hukouProv","hukouCity"].forEach(id=>$(id).addEventListener("change", syncUi));
   syncUi();
 
-  // query
+  // query with loading state
   $("btnQuery").addEventListener("click", ()=>{
-    applied = buildDraft();
-    // update cats display now
-    const cats = getUserCats(applied.edu, applied.major);
-    $("jCats").value = cats.join("，");
-    const out = filterJobs(applied);
-    lastFilteredAll = out.res;
-    page = 1;
-    // hint for hidden prison counts
-    const prof = normalizeProfile(applied);
-    let hint = "";
-    if(prof.isNonGrad && (prof.isNonJS || prof.isLYG)){
-      hint = `已按户籍策略隐藏部分地区岗位。`;
-      if(out.hiddenPrisonCount>0){
-        hint += `（其中监狱相关岗位被隐藏：${out.hiddenPrisonCount} 条）`;
+    const btn = $("btnQuery");
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading"></span> 查询中...';
+    
+    setTimeout(() => {
+      applied = buildDraft();
+      // update cats display now
+      const cats = getUserCats(applied.edu, applied.major);
+      $("jCats").value = cats.join("，");
+      const out = filterJobs(applied);
+      lastFilteredAll = out.res;
+      page = 1;
+      // hint for hidden prison counts
+      const prof = normalizeProfile(applied);
+      let hint = "";
+      if(prof.isNonGrad && (prof.isNonJS || prof.isLYG)){
+        hint = `已按户籍策略隐藏部分地区岗位。`;
+        if(out.hiddenPrisonCount>0){
+          hint += `（其中监狱相关岗位被隐藏：${out.hiddenPrisonCount} 条）`;
+        }
       }
-    }
-    $("hint").textContent = hint;
-    render();
+      $("hint").textContent = hint;
+      render();
+      
+      btn.disabled = false;
+      btn.textContent = originalText;
+      
+      // Scroll to results
+      if(lastFilteredAll.length > 0) {
+        $("results").scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 400);
   });
 
   $("btnReset").addEventListener("click", ()=>{
