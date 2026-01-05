@@ -3,22 +3,23 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>查专业 → 查岗位（本地版A）</title>
+  <meta name="description" content="江苏省考专业查岗系统 - 查询专业大类和可报考岗位"/>
+  <title>江苏省考专业查岗系统</title>
   <link rel="stylesheet" href="./styles.css"/>
 </head>
 <body>
-<header>
-  <div class="container">
-    <h1>查专业 → 查岗位（本地版A）</h1>
-    <div class="small">数据来源：5个选项已处理.xlsx（已转为本地 JSON）；专业目录：2026年公务员专业目录.doc（已转换）</div>
+<header role="banner">
+  <div class="container" style="text-align:center;">
+    <h1>江苏省考选岗系统-k版</h1>
+    <p class="small">数据来源：26省考岗位表（无监狱系统）；专业目录：2026年公务员专业目录.doc（已转换）</p>
   </div>
 </header>
 
-<div class="container">
-  <div class="tabs">
-    <button id="tabMajor" class="tab active">① 查专业大类</button>
-    <button id="tabJobs" class="tab">② 查可报岗位</button>
-  </div>
+<main class="container" role="main">
+  <nav class="tabs" role="tablist" aria-label="功能切换">
+    <button id="tabMajor" class="tab active" role="tab" aria-selected="true" aria-controls="panelMajor">① 查专业大类</button>
+    <button id="tabJobs" class="tab" role="tab" aria-selected="false" aria-controls="panelJobs">② 查可报岗位</button>
+  </nav>
 
   <section id="panelMajor" class="card">
     <div class="grid">
@@ -201,7 +202,7 @@
     <div class="pager" id="pager" style="display:none"></div>
   </section>
 
-</div>
+</main>
 
 <script src="./app.js"></script>
 </body>
