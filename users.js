@@ -9,10 +9,12 @@ const USERS = {
   "18994772558": "lydtjy2558",
   "17301529855": "lydtjy9855",
   "15295128531": "jtdtjy8531",
-  "13813511082": "jtdtjy1082"
+  "13813511082": "jtdtjy1082",
+  "18151243004": "czdtjy3004"
 };
 
 // 导出用户数据
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = USERS;
 }
+
